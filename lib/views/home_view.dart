@@ -66,7 +66,7 @@ class HomeView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
-          onPressed: () => controller.fetchDefaultRingtone(),
+          onPressed: () => controller.authenticateAndLoadRingtone(),
           child: Text('Fetch Default Ringtone'),
         ),
         SizedBox(height: 20),
@@ -93,17 +93,26 @@ class HomeView extends StatelessWidget {
             }
 
             return controller.ringtoneInfo.isEmpty
-                ? Text('No ringtone information available')
+                ? Text('Hey user!\nClick the above button',
+                    style: TextStyle(fontSize: 16), textAlign: TextAlign.center)
                 : Text(controller.ringtoneInfo.value);
           }),
         ),
 
         SizedBox(height: 20),
 
-        ElevatedButton(
-          onPressed: () => controller.playRingtone(),
-          child: Text('Play Ringtone'),
-        ),
+        // Play button - only enabled if ringtone info is available
+        Obx(() => ElevatedButton(
+              onPressed: controller.ringtoneInfo.isNotEmpty
+                  ? () => controller.playRingtone()
+                  : null,
+              style: ElevatedButton.styleFrom(
+                // Dim the button if disabled
+                disabledBackgroundColor: Colors.grey.shade300,
+                disabledForegroundColor: Colors.grey.shade500,
+              ),
+              child: Text('Play Ringtone'),
+            )),
       ],
     );
   }

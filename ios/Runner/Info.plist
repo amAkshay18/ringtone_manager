@@ -49,5 +49,10 @@
 	<!-- Microphone permission -->
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access to play ringtones</string>	
+
+	<!-- Biometric Authentication permission -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>We need your permission to use Face ID for authentication.</string>
+
 </dict>
 </plist>

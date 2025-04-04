@@ -4,24 +4,38 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import '../services/ringtone_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/biometric_service.dart';
 
 class RingtoneController extends GetxController with WidgetsBindingObserver {
   final RingtoneService _ringtoneService = RingtoneService();
   final SecureStorageService _secureStorage = SecureStorageService();
+  final BiometricService _biometricService = BiometricService();
 
   final ringtoneInfo = RxString('');
   final isLoading = false.obs;
   final hasError = false.obs;
   final errorMessage = ''.obs;
   final hasPermission = false.obs;
+  final isRingtoneAvailable = false.obs;
+  final isBiometricsAvailable = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     // Register this controller as an observer for app lifecycle events
     WidgetsBinding.instance.addObserver(this);
-    checkPermissions();
-    loadLastRingtone();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await checkPermissions();
+    await checkBiometricAvailability();
+    await loadLastRingtone();
+  }
+
+  Future<void> checkBiometricAvailability() async {
+    isBiometricsAvailable.value =
+        await _biometricService.isBiometricsAvailable();
   }
 
   @override
@@ -147,7 +161,37 @@ class RingtoneController extends GetxController with WidgetsBindingObserver {
   Future<void> loadLastRingtone() async {
     String? lastRingtone = await _secureStorage.getLastRingtoneData();
     if (lastRingtone != null && lastRingtone.isNotEmpty) {
+      // Don't set ringtoneInfo directly, just mark that it's available in storage
+      isRingtoneAvailable.value = true;
+    } else {
+      isRingtoneAvailable.value = false;
+    }
+  }
+
+  // Authenticate and then load ringtone data
+  Future<void> authenticateAndLoadRingtone() async {
+    if (!isBiometricsAvailable.value) {
+      // If biometrics not available, just load the ringtone
+      return await loadRingtoneData();
+    }
+
+    bool authenticated = await _biometricService.authenticateWithFingerprint();
+    if (authenticated) {
+      await loadRingtoneData();
+    } else {
+      hasError.value = true;
+      errorMessage.value = 'Authentication failed. Please try again.';
+    }
+  }
+
+  // Load ringtone data from secure storage (after authentication)
+  Future<void> loadRingtoneData() async {
+    String? lastRingtone = await _secureStorage.getLastRingtoneData();
+    if (lastRingtone != null && lastRingtone.isNotEmpty) {
       ringtoneInfo.value = lastRingtone;
+    } else {
+      // If no saved data, fetch new data
+      await fetchDefaultRingtone();
     }
   }
 
@@ -175,6 +219,7 @@ class RingtoneController extends GetxController with WidgetsBindingObserver {
 
       // Store in secure storage
       await _secureStorage.saveRingtoneData(ringtoneInfo.value);
+      isRingtoneAvailable.value = true;
     } catch (e) {
       hasError.value = true;
       errorMessage.value = e.toString();
@@ -184,8 +229,14 @@ class RingtoneController extends GetxController with WidgetsBindingObserver {
     }
   }
 
-  // Play the default ringtone
+  // Play the default ringtone (only if ringtone info is available)
   Future<void> playRingtone() async {
+    if (ringtoneInfo.isEmpty) {
+      hasError.value = true;
+      errorMessage.value = 'Please fetch ringtone information first';
+      return;
+    }
+
     // First check if we already have permission
     await checkPermissions();
 

@@ -1,7 +1,7 @@
 package com.example.innovitegra
 
 import androidx.annotation.NonNull
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.media.RingtoneManager
@@ -11,7 +11,7 @@ import android.net.Uri
 import android.util.Log
 import java.io.File
 
-class MainActivity: FlutterActivity() {
+class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.example.ringtone_manager/ringtone"
     private var ringtoneUri: Uri? = null
     private var ringtone: Ringtone? = null
