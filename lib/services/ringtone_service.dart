@@ -7,9 +7,10 @@ class RingtoneService {
   // Fetch default ringtone info from native code
   Future<Map<String, dynamic>> getDefaultRingtone() async {
     try {
-      final Map<String, dynamic> result =
-          await platform.invokeMethod('getDefaultRingtone');
-      return result;
+      final result = await platform.invokeMethod('getDefaultRingtone');
+      final Map<String, dynamic> ringtoneData =
+          Map<String, dynamic>.from(result);
+      return ringtoneData;
     } on PlatformException catch (e) {
       throw "Failed to get ringtone: ${e.message}";
     }
