@@ -27,7 +27,7 @@ A Flutter application that demonstrates native module integration by accessing t
 
 ### Prerequisites
 
-- Flutter SDK (latest stable version)
+- Flutter SDK 3.27.2
 - Android Studio / Xcode
 - Physical device or emulator with fingerprint capability for testing biometric authentication
 
@@ -37,7 +37,7 @@ A Flutter application that demonstrates native module integration by accessing t
 
 ```bash
 git clone https://github.com/amAkshay18/ringtone_manager.git
-cd flutter-ringtone-manager
+cd ringtone-manager
 ```
 
 2. Install dependencies:
