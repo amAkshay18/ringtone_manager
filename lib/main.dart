@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'views/home_view.dart';
 
 void main() {
+  // Ensure that plugin services are initialized before running the app
   WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }

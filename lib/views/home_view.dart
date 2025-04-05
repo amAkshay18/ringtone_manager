@@ -1,33 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:innovitegra/controllers/biometric_controller.dart';
 import '../controllers/ringtone_controller.dart';
 
 class HomeView extends StatelessWidget {
   final RingtoneController controller = Get.put(RingtoneController());
+  final BiometricController biometricController =
+      Get.put(BiometricController());
 
   HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Ringtone Manager'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Obx(() {
-            // Show permission request UI if permission is not granted
-            if (!controller.hasPermission.value) {
-              return _buildPermissionRequest();
-            }
+    return Obx(() {
+      if (!biometricController.isAuthenticated.value) {
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Please authenticate"),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: biometricController.authenticate,
+                  child: const Text("Try Again"),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
 
-            // Show main UI if permission is granted
-            return _buildMainContent();
-          }),
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Ringtone Manager'),
         ),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Obx(() {
+              if (!controller.hasPermission.value) {
+                return _buildPermissionRequest();
+              }
+              return _buildMainContent();
+            }),
+          ),
+        ),
+      );
+    });
   }
 
   // Widget for requesting permissions
@@ -35,26 +55,22 @@ class HomeView extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.music_note,
-          size: 80,
-          color: Colors.grey,
-        ),
-        SizedBox(height: 20),
-        Text(
+        const Icon(Icons.music_note, size: 80, color: Colors.grey),
+        const SizedBox(height: 20),
+        const Text(
           'Storage Permission Required',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10),
-        Text(
+        const SizedBox(height: 10),
+        const Text(
           'This app needs permission to access your device storage to retrieve and play ringtones.',
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () => controller.requestPermissions(),
-          child: Text('Grant Permission'),
+          child: const Text('Grant Permission'),
         ),
       ],
     );
@@ -67,51 +83,48 @@ class HomeView extends StatelessWidget {
       children: [
         ElevatedButton(
           onPressed: () => controller.authenticateAndLoadRingtone(),
-          child: Text('Fetch Default Ringtone'),
+          child: const Text('Fetch Default Ringtone'),
         ),
-        SizedBox(height: 20),
-
-        // Ringtone info display section
+        const SizedBox(height: 20),
         Container(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Get.theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
           ),
           width: double.infinity,
-          constraints: BoxConstraints(minHeight: 100),
+          constraints: const BoxConstraints(minHeight: 100),
           child: Obx(() {
             if (controller.isLoading.value) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (controller.hasError.value) {
               return Text(
                 'Error: ${controller.errorMessage}',
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               );
             }
 
             return controller.ringtoneInfo.isEmpty
-                ? Text('Hey user!\nClick the above button',
-                    style: TextStyle(fontSize: 16), textAlign: TextAlign.center)
+                ? const Text(
+                    'Hey user!\nClick the above button',
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  )
                 : Text(controller.ringtoneInfo.value);
           }),
         ),
-
-        SizedBox(height: 20),
-
-        // Play button - only enabled if ringtone info is available
+        const SizedBox(height: 20),
         Obx(() => ElevatedButton(
               onPressed: controller.ringtoneInfo.isNotEmpty
                   ? () => controller.playRingtone()
                   : null,
               style: ElevatedButton.styleFrom(
-                // Dim the button if disabled
                 disabledBackgroundColor: Colors.grey.shade300,
                 disabledForegroundColor: Colors.grey.shade500,
               ),
-              child: Text('Play Ringtone'),
+              child: const Text('Play Ringtone'),
             )),
       ],
     );
