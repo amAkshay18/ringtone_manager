@@ -86,35 +86,40 @@ class HomeView extends StatelessWidget {
           child: const Text('Fetch Default Ringtone'),
         ),
         const SizedBox(height: 20),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Get.theme.colorScheme.surfaceContainerHighest,
+
+        // THEME-AWARE CARD FOR RINGTONE INFO
+        Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 100),
-          child: Obx(() {
-            if (controller.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 100),
+            padding: const EdgeInsets.all(16),
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            if (controller.hasError.value) {
-              return Text(
-                'Error: ${controller.errorMessage}',
-                style: const TextStyle(color: Colors.red),
-              );
-            }
+              if (controller.hasError.value) {
+                return Text(
+                  'Error: ${controller.errorMessage}',
+                  style: const TextStyle(color: Colors.red),
+                );
+              }
 
-            return controller.ringtoneInfo.isEmpty
-                ? const Text(
-                    'Hey user!\nClick the above button',
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  )
-                : Text(controller.ringtoneInfo.value);
-          }),
+              return controller.ringtoneInfo.isEmpty
+                  ? const Text(
+                      'Hey user!\nClick the above button',
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    )
+                  : Text(controller.ringtoneInfo.value);
+            }),
+          ),
         ),
+
         const SizedBox(height: 20),
         Obx(() => ElevatedButton(
               onPressed: controller.ringtoneInfo.isNotEmpty
